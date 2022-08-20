@@ -1,16 +1,13 @@
 # feed-io
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/9cabcb4b-695e-43fa-8b83-a1f9ecefea88/mini.png)](https://insight.sensiolabs.com/projects/9cabcb4b-695e-43fa-8b83-a1f9ecefea88)
-[![Latest Stable Version](https://poser.pugx.org/debril/feed-io/v/stable.png)](https://packagist.org/packages/debril/feed-io)
-[![Build Status](https://secure.travis-ci.org/alexdebril/feed-io.png?branch=master)](http://travis-ci.org/alexdebril/feed-io)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/alexdebril/feed-io/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/alexdebril/feed-io/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/alexdebril/feed-io/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/alexdebril/feed-io/?branch=master)
+> ### Notice:
+> This is a fork of the version 4 branch, it exists because of the need to run the minimum version of PHP 7.1+ including later versions. The original library handles PHP environments with later versions.
+> The contents of the fork have been purged. It has been stripped of tests and other tools I don't currently use.
 
-[feed-io](https://github.com/alexdebril/feed-io) is a PHP library built to consume and serve news feeds. It features:
+This is a PHP library built to consume and serve news feeds. It features:
 
 - JSONFeed / Atom / RSS read and write support
 - Feeds auto-discovery through HTML headers
-- a Command line interface to discover and read feeds
 - Multiple feeds reading at once through asynchronous requests
 - PSR-7 Response generation with accurate cache headers
 - HTTP Headers support when reading feeds in order to save network traffic
@@ -24,14 +21,13 @@
 - A generic HTTP ClientInterface
 - Guzzle Client integration
 
-Keep informed about new releases and incoming features : https://debril.org/categories/feed-io
 
 # Installation
 
 Use Composer to add feed-io into your project's requirements :
 
 ```sh
-    composer require debril/feed-io
+    composer require danek/feed-io
  ```
 
 # Requirements
@@ -42,53 +38,23 @@ feed-io requires :
 - psr/log 1.0
 - guzzlehttp/guzzle 6.2+
 
-it suggests :
-- monolog/monolog 1.10+
 
 Monolog is not the only library suitable to handle feed-io's logs, you can use any PSR/Log compliant library instead.
-
-## Why skipping PHP 7.0 ?
-
-feed-io 4 requires PHP 7.1+ because return types cannot be nullable in PHP 7.0.
 
 # Fetching the repository
 
 Do this if you want to contribute (and you're welcome to do so):
 
 ```sh
-    git clone https://github.com/alexdebril/feed-io.git
+    git clone https://github.com/jDanek/feed-io.git
 
     cd feed-io/
 
     composer install
 ```
 
-# Unit Testing
-
-You can run the unit test suites using the following command in the library's source directory:
-
-```sh
-
-    ./vendor/bin/phpunit
-
-```
-
 Usage
 =====
-
-## CLI
-
-Let's suppose you installed feed-io using Composer, you can use its command line client to read feeds from your terminal :
-
-```shell
-./vendor/bin/feedio read http://php.net/feed.atom
-```
-
-You can specify the number of items you want to read using the --count option. The instruction below will display the latest item :
-
-```shell
-./vendor/bin/feedio read -c 1 http://php.net/feed.atom
-```
 
 ## reading
 
@@ -97,7 +63,7 @@ feed-io is designed to read feeds across the internet and to publish your own. I
 ```php
 
 // create a simple FeedIo instance
-$feedIo = \FeedIo\Factory::create()->getFeedIo();
+$feedIo = \Danek\FeedIo\Factory::create()->getFeedIo();
 
 // read a feed
 $result = $feedIo->read($url);
@@ -127,16 +93,16 @@ echo "average interval in seconds: {$updateStats->getAverageInterval()}";
 
 feed-io calculates the next update time by first detecting if the feed was active in the last 7 days and if not we consider it as sleepy. The next update date for a sleepy feed is set to the next day at the same time. If the feed isn't sleepy we use the average interval and the median interval by adding those intervals to the feed's last modified date and compare the result to the current time. If the result is in the future, then it's returned as the next update time. If none of them are in the future, we considered the feed will be updated quite soon, so the next update time is one hour later from the moment of the calculation.
 
-Please note: the fixed delays for sleepy and closed to be updated feeds can be set through `Result::getNextUpdate()` arguments, see [Result](src/FeedIo/Reader/Result.php) for more details.
+Please note: the fixed delays for sleepy and closed to be updated feeds can be set through `Result::getNextUpdate()` arguments, see [Result](src/Reader/Result.php) for more details.
 
 
 ### Asynchronous reading of several feeds at once
 
 Thanks to Guzzle, feed-io is able to fetch several feeds at once through asynchronous requests. If you're willing to get more information about the way it works, you can read [Guzzle's documentation](http://docs.guzzlephp.org/en/stable/quickstart.html#async-requests).
 
-To read feeds using asynchronous requests with feed-io, you need to send a pool of `\FeedIo\Async\Request` objects to `\FeedIo\FeedIo::readAsync` and handle the result with a `\FeedIo\Async\CallbackInterface` of your own. You can also use `\FeedIo\Async\DefaultCallback` in order to test the feature.
+To read feeds using asynchronous requests with feed-io, you need to send a pool of `\Danek\FeedIo\Async\Request` objects to `\Danek\FeedIo\FeedIo::readAsync` and handle the result with a `\Danek\FeedIo\Async\CallbackInterface` of your own. You can also use `\Danek\FeedIo\Async\DefaultCallback` in order to test the feature.
 
-Each `\FeedIo\Async\Request` is a request you want to perform, it embeds the feed's URL and optionnally a `\DateTime` to define the `modified-since` attribute of the request.
+Each `\Danek\FeedIo\Async\Request` is a request you want to perform, it embeds the feed's URL and optionnally a `\DateTime` to define the `modified-since` attribute of the request.
 
 The `CallbackInterface` instance needs two methods :
 
@@ -163,7 +129,7 @@ A web page can refer to one or more feeds in its headers, feed-io provides a way
 
 ```php
 
-$feedIo = \FeedIo\Factory::create()->getFeedIo();
+$feedIo = \Danek\FeedIo\Factory::create()->getFeedIo();
 
 $feeds = $feedIo->discover($url);
 
@@ -185,7 +151,7 @@ You'll get all discovered feeds in the output.
 ```php
 
 // build the feed
-$feed = new FeedIo\Feed;
+$feed = new Danek\Danek\FeedIo\Feed;
 $feed->setTitle('...');
 
 // convert it into Atom
@@ -200,7 +166,7 @@ $atomString = $feedIo->format($feed, 'atom');
 
 ```php
 
-$feed = new FeedIo\Feed;
+$feed = new \Danek\FeedIo\FeedIo\Feed;
 $feed->setTitle('...');
 $styleSheet = new StyleSheet('http://url-of-the-xsl-stylesheet.xsl');
 $feed->setStyleSheet($styleSheet);
@@ -211,7 +177,7 @@ $feed->setStyleSheet($styleSheet);
 
 ```php
 // build the feed
-$feed = new FeedIo\Feed;
+$feed = new \Danek\FeedIo\FeedIo\Feed;
 $feed->setTitle('...');
 
 $item = $feed->newItem();
@@ -225,7 +191,7 @@ $feed->set('itunes,title', 'Sample Title'); //OR any other element defined in th
 $item->addElement('itunes:category', 'Education');
 
 // build the media
-$media = new \FeedIo\Feed\Item\Media
+$media = new \Danek\FeedIo\Feed\Item\Media
 $media->setUrl('http://yourdomain.tld/medias/some-podcast.mp3');
 $media->setType('audio/mpeg');
 
@@ -238,14 +204,14 @@ $feed->add($item);
 
 ## Creating a valid PSR-7 Response with a feed
 
-You can turn a `\FeedIo\FeedInstance` directly into a PSR-7 valid response using `\FeedIo\FeedIo::getPsrResponse()` :
+You can turn a `\Danek\FeedIo\FeedInstance` directly into a PSR-7 valid response using `\Danek\FeedIo\FeedIo::getPsrResponse()` :
 
 ```php
 
-$feed = new \FeedIo\Feed;
+$feed = new \Danek\FeedIo\Feed;
 
 // feed the beast ...
-$item = new \FeedIo\Feed\Item;
+$item = new \Danek\FeedIo\Feed\Item;
 $item->set ...
 $feed->add($item);
 
@@ -266,7 +232,7 @@ For that, we will inject the configuration through `Factory::create()` parameter
 A few lines above, we talked about ignoring ssl errors, let's see how to configure Guzzle to do this:
 
 ```php
-$feedIo = \FeedIo\Factory::create(
+$feedIo = \Danek\FeedIo\Factory::create(
         ['builder' => 'NullLogger'], // assuming you want feed-io to keep quiet
         ['builder' => 'GuzzleClient', 'config' => ['verify' => false]]
     )->getFeedIo();
@@ -280,7 +246,7 @@ feed-io natively supports PSR-3 logging, you can activate it by choosing a 'buil
 
 ```php
 
-$feedIo = \FeedIo\Factory::create(['builder' => 'monolog'])->getFeedIo();
+$feedIo = \Danek\FeedIo\Factory::create(['builder' => 'monolog'])->getFeedIo();
 
 ```
 
@@ -299,21 +265,21 @@ To create a new FeedIo instance you only need to inject two dependencies :
 // here we use Guzzle as a dependency for the client
 $guzzle = new GuzzleHttp\Client();
 // Guzzle is wrapped in this adapter which is a FeedIo\Adapter\ClientInterface  implementation
-$client = new FeedIo\Adapter\Guzzle\Client($guzzle);
+$client = new \Danek\FeedIo\FeedIo\Adapter\Guzzle\Client($guzzle);
 
 // second dependency : a PSR-3 logger
 $logger = new Psr\Log\NullLogger();
 
 // now create FeedIo's instance
-$feedIo = new FeedIo\FeedIo($client, $logger);
+$feedIo = new \Danek\FeedIo\FeedIo\FeedIo($client, $logger);
 
 ```
 
 Another example with Monolog configured to write on the standard output :
 
 ```php
-use FeedIo\FeedIo;
-use FeedIo\Adapter\Guzzle\Client;
+use \Danek\FeedIo\FeedIo\FeedIo;
+use \Danek\FeedIo\FeedIo\Adapter\Guzzle\Client;
 use GuzzleHttp\Client as GuzzleClient;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
@@ -330,8 +296,8 @@ $feedIo = new FeedIo($client, $logger);
 You can configure Guzzle before injecting it to `FeedIo` :
 
 ```php
-use FeedIo\FeedIo;
-use FeedIo\Adapter\Guzzle\Client;
+use \Danek\FeedIo\FeedIo\FeedIo;
+use \Danek\FeedIo\FeedIo\Adapter\Guzzle\Client;
 use GuzzleHttp\Client as GuzzleClient;
 use \Psr\Log\NullLogger;
 
@@ -341,7 +307,7 @@ $client = new Client($guzzle);
 
 $logger = new NullLogger();
 
-$feedIo = new \FeedIo\FeedIo($client, $logger);
+$feedIo = new \Danek\FeedIo\FeedIo($client, $logger);
 
 ```
 Please read [Guzzle's documentation](http://docs.guzzlephp.org/en/stable/index.html) to get more information about its configuration.
@@ -351,8 +317,8 @@ Please read [Guzzle's documentation](http://docs.guzzlephp.org/en/stable/index.h
 To prevent your application from hitting the same feeds multiple times, you can inject [Kevin Rob's cache middleware](https://github.com/Kevinrob/guzzle-cache-middleware) into Guzzle's instance :
 
 ```php
-use FeedIo\FeedIo;
-use FeedIo\Adapter\Guzzle\Client;
+use \Danek\FeedIo\FeedIo\FeedIo;
+use \Danek\FeedIo\FeedIo\Adapter\Guzzle\Client;
 use GuzzleHttp\Client As GuzzleClient;
 use GuzzleHttp\HandlerStack;
 use Kevinrob\GuzzleCache\CacheMiddleware;
@@ -369,7 +335,7 @@ $guzzle = new GuzzleClient(['handler' => $stack]);
 $client = new Client($guzzle);
 $logger = new NullLogger();
 
-$feedIo = new \FeedIo\FeedIo($client, $logger);
+$feedIo = new \Danek\FeedIo\FeedIo($client, $logger);
 
 ```
 
@@ -380,8 +346,8 @@ As feeds' content may vary often, caching may result in unwanted behaviors.
 You can inject any Logger you want as long as it implements `Psr\Log\LoggerInterface`. Monolog does, but it's the only library : https://packagist.org/providers/psr/log-implementation
 
 ```php
-use FeedIo\FeedIo;
-use FeedIo\Adapter\Guzzle\Client;
+use \Danek\FeedIo\FeedIo\FeedIo;
+use \Danek\FeedIo\FeedIo\Adapter\Guzzle\Client;
 use GuzzleHttp\Client as GuzzleClient;
 use Custom\Logger;
 
@@ -399,7 +365,7 @@ Warning : it is highly recommended to use the default Guzzle Client integration.
 If you really want to use another library to read feeds, you need to create your own `FeedIo\Adapter\ClientInterface` class to embed interactions with the library :
 
 ```php
-use FeedIo\FeedIo;
+use \Danek\FeedIo\FeedIo\FeedIo;
 use Custom\Adapter\Client;
 use Library\Client as LibraryClient;
 use Psr\Log\NullLogger;
@@ -426,7 +392,3 @@ $feedIo->getDateTimeBuilder()->resetFeedTimezone();
 ```
 
 Don't forget to reset `feedTimezone` after fetching the result, or you'll end up with all feeds located in the same timezone.
-
-## Online documentation
-
-The whole documentation is available at https://feed-io.net
